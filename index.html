@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你的寿命有多长？健康自测</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+body{background:#f0f4f8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:#fff;border-radius:20px;width:100%;max-width:480px;padding:32px 28px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+h1{font-size:24px;color:#1a1a1a;margin-bottom:8px;text-align:center}
+.sub{font-size:14px;color:#888;text-align:center;margin-bottom:28px;line-height:1.6}
+.progress{height:4px;background:#eee;border-radius:2px;margin-bottom:24px;overflow:hidden}
+.bar{height:100%;background:linear-gradient(90deg,#4facfe,#00f2fe);width:0;transition:width .3s}
+.qnum{font-size:13px;color:#4facfe;margin-bottom:6px;font-weight:500}
+.question{font-size:18px;font-weight:600;color:#222;margin-bottom:20px;line-height:1.5}
+.option{padding:14px 16px;border:2px solid #e8eef3;border-radius:12px;margin-bottom:12px;cursor:pointer;transition:all .2s;font-size:15px;color:#444}
+.option:hover{border-color:#4facfe;background:#f0f9ff}
+.option.selected{border-color:#4facfe;background:#e6f7ff;color:#1a1a1a}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;transition:all .2s}
+.btn-next{background:#4facfe;color:#fff}
+.btn-next:hover{background:#3a9bf0}
+.btn-start{background:linear-gradient(135deg,#4facfe,#00f2fe);color:#fff;font-size:18px;padding:16px}
+.btn-start:hover{opacity:.9}
+.tip{font-size:12px;color:#aaa;margin-top:10px;text-align:center}
+.result-num{font-size:56px;font-weight:800;background:linear-gradient(135deg,#4facfe,#00f2fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin:16px 0}
+.tag{display:inline-block;background:#e6f7ff;color:#4facfe;padding:6px 14px;border-radius:20px;font-size:14px;font-weight:500;margin:8px 0}
+.adv{background:linear-gradient(135deg,#fff7e6,#fff1d6);border-radius:14px;padding:18px;margin-top:24px;text-align:center}
+.adv h3{font-size:16px;color:#e67700;margin-bottom:8px}
+.adv p{font-size:13px;color:#666;margin-bottom:12px;line-height:1.6}
+.adv-btn{display:inline-block;background:#e67700;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600}
+</style>
+
+<div class="card">
+  <!-- 引入页 -->
+  <div id="intro">
+    <h1>🔍 你的寿命有多长？</h1>
+    <p class="sub">10道题测出你的“身体年龄”和预期寿命<br>全国人均预期寿命 <strong>79.25岁</strong>（2026年数据）</p >
+    <button class="btn btn-start" onclick="start()">开始测试</button>
+    <p class="tip">约需1分钟 · 纯属娱乐 · 结果可截图分享</p >
+  </div>
+
+  <!-- 答题页 -->
+  <div id="quiz" style="display:none">
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="qnum" id="qnum"></div>
+    <div class="question" id="question"></div>
+    <div id="options"></div>
+    <button class="btn btn-next" id="nextBtn" onclick="next()" style="display:none">下一题</button>
+  </div>
+
+  <!-- 结果页 -->
+  <div id="result" style="display:none;text-align:center">
+    <h2 style="margin-bottom:8px">🎉 测试完成</h2>
+    <p style="color:#666;font-size:14px">你的预期寿命</p >
+    <div class="result-num" id="lifeScore">--</div>
+    <div class="tag" id="bodyAge">身体年龄：--</div>
+    <div class="tag" id="compareTag" style="margin-left:8px">与全国人均对比：--</div>
+    <p class="sub" id="tip" style="margin-top:16px"></p >
+    <button class="btn btn-start" style="margin-top:20px" onclick="alert('截图保存，分享给朋友吧！')">📸 截图分享</button>
+    <div class="adv">
+      <h3>📖《21天科学延寿计划》</h3>
+      <p>从饮食、运动、睡眠、心态四个维度<br>帮你把寿命延长10-15年</p >
+      <a class="adv-btn" href=" '这里换成你的购买链接')">立即获取 ¥99</a >
+    </div>
+  </div>
+</div>
+
+<script>
+const questions=[
+  {q:"你平均每天的睡眠时长是？",options:[{t:"7-8小时",s:10},{t:"6-7小时或8-9小时",s:8},{t:"少于6小时或多于9小时",s:5}]},
+  {q:"你每周进行中等强度运动的频率是？",options:[{t:"3次及以上",s:10},{t:"1-2次",s:6},{t:"几乎没有",s:2}]},
+  {q:"你的日常饮食结构偏向？",options:[{t:"荤素搭配，多吃蔬果粗粮",s:10},{t:"比较均衡，偶尔高油高糖",s:6},{t:"经常吃外卖、油炸或重口味",s:2}]},
+  {q:"你是否有吸烟或过量饮酒的习惯？",options:[{t:"从不吸烟，极少饮酒",s:10},{t:"已戒烟，或偶尔少量饮酒",s:6},{t:"目前仍在吸烟，或经常饮酒",s:0}]},
+  {q:"你的BMI（体重kg/身高m²）大致处于？",options:[{t:"18.5-24（正常）",s:10},{t:"24-28（超重）",s:5},{t:"大于28或小于18.5",s:2}]},
+  {q:"你爬3层楼梯或快走2公里后？",options:[{t:"呼吸平稳，无明显不适",s:10},{t:"轻微气喘，稍作休息即可恢复",s:6},{t:"胸闷、心悸或极度疲惫",s:0}]},
+  {q:"过去一年，你因为小病去医院或吃药的频率是？",options:[{t:"1-2次",s:10},{t:"3-5次",s:6},{t:"经常生病，免疫力较差",s:2}]},
+  {q:"面对生活和工作压力时，你的心态通常是？",options:[{t:"能自我调节，保持乐观",s:10},{t:"偶尔焦虑，但能正常应对",s:6},{t:"经常感到压抑、失眠或情绪低落",s:2}]},
+  {q:"你是否有定期体检的习惯？",options:[{t:"每年1次",s:10},{t:"2-3年1次",s:5},{t:"从不体检",s:0}]},
+  {q:"你与家人、朋友的关系及社交活动频率是？",options:[{t:"关系融洽，有固定的社交圈",s:10},{t:"关系一般，偶尔联系",s:6},{t:"经常感到孤独，缺乏社交",s:2}]}
+];
+let cur=0, scores=new Array(10).fill(0);
+
+function start(){document.getElementById('intro').style.display='none';document.getElementById('quiz').style.display='block';render()}
+function render(){
+  document.getElementById('bar').style.width=(cur/10*100)+'%';
+  document.getElementById('qnum').textContent='第 '+(cur+1)+' 题 / 共10题';
+  document.getElementById('question').textContent=questions[cur].q;
+  const box=document.getElementById('options');
+  box.innerHTML='';
+  questions[cur].options.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='option';
+    d.textContent=o.t;
+    d.onclick=()=>{box.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));d.classList.add('selected');scores[cur]=o.s;document.getElementById('nextBtn').style.display='block'};
+    box.appendChild(d);
+  });
+  document.getElementById('nextBtn').style.display=scores[cur]?'block':'none';
+}
+function next(){
+  if(!scores[cur]){alert('请先选择一个选项');return}
+  if(cur<9){cur++;render()}
+  else showResult();
+}
+function showResult(){
+  const total=scores.reduce((a,b)=>a+b,0);
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('result').style.display='block';
+  const life=Math.round((79.25+total*0.2)*10)/10;
+  document.getElementById('lifeScore').textContent=life+' 岁';
+  document.getElementById('bodyAge').textContent='身体年龄：'+(total>=80?'比实际年轻':total>=50?'与实际相符':'比实际偏老');
+  document.getElementById('compareTag').textContent='与全国人均对比：'+(life>=79.25?'高于平均':'低于平均');
+  document.getElementById('tip').innerHTML=total>=80?'🎉 你的生活方式非常健康，继续保持！':total>=50?'⚠️ 身体基础不错，但饮食、运动或作息有优化空间，建议每周增加1-2次运动。':'🚨 身体已发出疲劳信号，建议优先保证睡眠、控制体重，并做一次全面体检。';
+}
+</script>
+</html>
